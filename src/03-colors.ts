@@ -1,5 +1,5 @@
 import {
-  makeDemo, randomOpaqueColor, lerp, compileShaderProgram,
+  setupDemo, randomOpaqueColor, lerp, compileShaderProgram,
   ShaderProgram
 } from "./util";
 
@@ -19,7 +19,7 @@ void main() {
 
 let triangleVertexBuffer: WebGLBuffer;
 let shaderProgram: ShaderProgram;
-makeDemo({
+setupDemo({
   setup(gl: WebGLRenderingContext) {
     // Build the program that the GPU has to run to render our triangle
     shaderProgram = compileShaderProgram(

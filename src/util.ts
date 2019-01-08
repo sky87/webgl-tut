@@ -1,10 +1,13 @@
 export interface Demo {
-  stop(): void;
+  canvas: HTMLCanvasElement,
+  gl: WebGLRenderingContext,
+  draw: (gl: WebGLRenderingContext) => void,
+  raf: boolean
 }
 
-export let currentDemo: Demo = null;
+export let demo: Demo = null;
 
-export function makeDemo({
+export function setupDemo({
   setup,
   draw,
   raf = false
@@ -13,50 +16,47 @@ export function makeDemo({
   setup?: (gl: WebGLRenderingContext) => void;
   draw?: (gl: WebGLRenderingContext) => void;
 }) {
-  if (currentDemo != null) {
-    currentDemo.stop();
-  }
-
-  const canvas = document.createElement("canvas");
-  canvas.id = "demo-canvas";
-  const gl = canvas.getContext("webgl");
-  Object.assign(document.body.style, {
-    margin: 0,
-    height: "100%",
-    overflow: "hidden"
-  });
-  document.body.appendChild(canvas);
-
-  function fitCanvas() {
+  if (demo == null) {
+    console.log("Initializing canvas");
+    const canvas = document.createElement("canvas");
+    canvas.id = "demo-canvas";
+    Object.assign(document.body.style, {
+      margin: 0,
+      height: "100%",
+      overflow: "hidden"
+    });
     canvas.width = document.body.offsetWidth;
     canvas.height = document.body.offsetHeight;
-    draw && draw(gl);
-  }
-  window.addEventListener("resize", fitCanvas);
-
-  setup && setup(gl);
-  fitCanvas();
-
-  let running = true;
-
-  const demo = {
-    stop() {
-      console.log("Stopping old demo");
-      running = false;
-      canvas.remove();
-      window.removeEventListener("resize", fitCanvas);
+    document.body.appendChild(canvas);
+    
+    const fitCanvas = () => {
+      canvas.width = document.body.offsetWidth;
+      canvas.height = document.body.offsetHeight;
+      demo.draw && demo.draw(demo.gl);
     }
-  };
+    window.addEventListener("resize", fitCanvas);
+    
+    demo = {
+      canvas,
+      gl: null,
+      draw: null,
+      raf: false
+    };
+  }
 
-  if (raf && draw) {
+  demo.gl = demo.canvas.getContext("webgl");
+  setup && setup(demo.gl);
+  draw && draw(demo.gl);
+
+  demo.draw = draw;
+  if (raf && !demo.raf) {
+    demo.raf = true;
     requestAnimationFrame(function raf() {
-      if (!running) return;
-      draw(gl);
+      if (!demo.raf) return;
+      demo.draw(demo.gl);
       requestAnimationFrame(raf);
     });
   }
-
-  currentDemo = demo;
 }
 
 export type Color = [number, number, number, number];
@@ -145,13 +145,6 @@ export function compileShaderProgram(
   };
 }
 
-function addLineNumbers(src: string) {
-  return src
-    .split("\n")
-    .map((line, index) => String(index + 1).padEnd(5) + "|" + line)
-    .join("\n");
-}
-
 export function compileShader(
   gl: WebGLRenderingContext,
   shader: WebGLShader,
@@ -161,15 +154,25 @@ export function compileShader(
   gl.compileShader(shader);
 
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    const sourceLines = source.split("\n");
     const errors = gl.getShaderInfoLog(shader).split("\n");
+    let buf = "Shader compilation errors:\n";
     errors.forEach(error => {
-      "ERROR: 0:75";
-      // TODO show only the 3 lines around the error
+      const ematch = error.match(/^(\w+)\s*:\s*(\d+):(\d+):\s*(.*)$/);
+      if (ematch == null) {
+        if (/\s*/.test(error)) return;
+        buf += "XX:" + error + "\n\n";
+        return;
+      }
+      const [_1, level, _2, lineStr, msg] = ematch;
+      const line = parseInt(lineStr, 10) - 1;
+
+      buf += "\n";
+      buf += sourceLines.slice(Math.max(0, line - 1), Math.min(line + 1, sourceLines.length - 1)).
+          map((sl, index) => String(index + line).padEnd(5) + "|" + sl).
+          join("\n");
+      buf += `\n\nLine ${lineStr}: ${msg}\n`;
     });
-    throw new Error(
-      `Shader:\n${addLineNumbers(
-        source
-      )}\n\ncompilation failed: ${gl.getShaderInfoLog(shader)}`
-    );
+    throw new Error(buf);
   }
 }

@@ -1,6 +1,6 @@
-import { makeDemo, randomOpaqueColor, lerp } from "./util";
+import { setupDemo, randomOpaqueColor, lerp } from "./util";
 
-makeDemo({
+setupDemo({
   draw(gl: WebGLRenderingContext) {
     // In WegGL colors are in the [0, 1] interval
     // r  g  b  a (a == 0 means transparent)
@@ -23,7 +23,7 @@ makeDemo({
 // let oldColor = randomOpaqueColor(); // [Math.random(), Math.random(), Math.random(), 1]
 // let newColor = randomOpaqueColor();
 // let lastColorChangeMs = performance.now();
-// makeDemo({
+// setupDemo({
 //   // Schedule a new draw every ~16 ms (= 60 fps)
 //   raf: true,
 //   draw(gl: WebGLRenderingContext) {
