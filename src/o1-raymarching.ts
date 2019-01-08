@@ -107,40 +107,44 @@ float sdUnion(float da, float db) {
 }
 
 float sdScene(vec3 p) {
-  float t = time/10.0;
-  p = rot3(vec3(0, 1, 0), -t*2.0*PI) * p;
+  vec3 op = p;
+  float t = time/6.0;
+  float d;
 
-  float d = sdSphere(p, vec3(0), 1.0);
-  
-  d = sdInt(d, sdBox(p, vec3(.8, .8, .8)));
+  {
+    p = rot3(vec3(1, 1, 0), -t*2.0*PI) * p;
 
-  d = sdSub(d, sdCylinder(p, vec3(1., 0, 0), .5));
-  d = sdSub(d, sdCylinder(p, vec3(0, 1., 0), .5));
-  d = sdSub(d, sdCylinder(p, vec3(0, 0, 1.), .5));
-  
-  d = sdSub(d, sdCylinder(p, vec3( 1.,  1., 1.), .1));
-  d = sdSub(d, sdCylinder(p, vec3( 1., -1., 1.), .1));
-  d = sdSub(d, sdCylinder(p, vec3(-1.,  1., 1.), .1));
-  d = sdSub(d, sdCylinder(p, vec3(-1., -1., 1.), .1));
-  
-  d = sdSub(d, sdSphere(p, vec3(0), .85));
+    d = sdSphere(p, vec3(0), 1.0);
+    
+    d = sdInt(d, sdBox(p, vec3(.8, .8, .8)));
 
-  float k = time/4.0;
-  float ir = .3 + .2 * cos(time/7.0*2.0*PI);
+    d = sdSub(d, sdCylinder(p, vec3(1., 0, 0), .5));
+    d = sdSub(d, sdCylinder(p, vec3(0, 1., 0), .5));
+    d = sdSub(d, sdCylinder(p, vec3(0, 0, 1.), .5));
+    
+    d = sdSub(d, sdCylinder(p, vec3( 1.,  1., 1.), .1));
+    d = sdSub(d, sdCylinder(p, vec3( 1., -1., 1.), .1));
+    d = sdSub(d, sdCylinder(p, vec3(-1.,  1., 1.), .1));
+    d = sdSub(d, sdCylinder(p, vec3(-1., -1., 1.), .1));
+    
+    d = sdSub(d, sdSphere(p, vec3(0), .85));
 
-  d = sdUnion(d, sdSphere(p, vec3(1.0 + .4*sin(k*2.0*PI), 0, 0), ir));
-  d = sdUnion(d, sdSphere(p, vec3(-1.0 + .4*sin(k*2.0*PI + PI), 0, 0), ir));
-  d = sdUnion(d, sdSphere(p, vec3(0, 1.0 + .4*sin(k*2.0*PI), 0), ir));
-  d = sdUnion(d, sdSphere(p, vec3(0, -1.0 + .4*sin(k*2.0*PI + PI), 0), ir));
-  d = sdUnion(d, sdSphere(p, vec3(0, 0, 1.0 + .4*sin(k*2.0*PI)), ir));
-  d = sdUnion(d, sdSphere(p, vec3(0, 0, -1.0 + .4*sin(k*2.0*PI + PI)), ir));
-  
-  //ir = .05;
-  //d = sdUnion(d, sdCylinder(p, vec3(1., 0, 0), ir));
-  //d = sdUnion(d, sdCylinder(p, vec3(0, 1., 0), ir));
-  //d = sdUnion(d, sdCylinder(p, vec3(0, 0, 1.), ir));
+    float k = time/4.0;
+    float ir = .3 + .2 * cos(time/7.0*2.0*PI);
 
-  d = sdUnion(d, sdPlane(p, vec3(0, -2, 0), vec3(0, 1, 0)));
+    d = sdUnion(d, sdSphere(p, vec3(1.0 + .4*sin(k*2.0*PI), 0, 0), ir));
+    d = sdUnion(d, sdSphere(p, vec3(-1.0 + .4*sin(k*2.0*PI + PI), 0, 0), ir));
+    d = sdUnion(d, sdSphere(p, vec3(0, 1.0 + .4*sin(k*2.0*PI), 0), ir));
+    d = sdUnion(d, sdSphere(p, vec3(0, -1.0 + .4*sin(k*2.0*PI + PI), 0), ir));
+    d = sdUnion(d, sdSphere(p, vec3(0, 0, 1.0 + .4*sin(k*2.0*PI)), ir));
+    d = sdUnion(d, sdSphere(p, vec3(0, 0, -1.0 + .4*sin(k*2.0*PI + PI)), ir));
+
+    p = op;
+  }
+
+  d = sdUnion(d, sdPlane(p, vec3(0, -1.8, 0), vec3(0, 1, 0)));
+  d = sdUnion(d, sdPlane(p, vec3(-8, 0, 0), vec3(1, 0, 0)));
+  d = sdUnion(d, sdPlane(p, vec3(0, 0, 8), vec3(0, 0, -1)));
   
   return d;
 }
@@ -220,7 +224,7 @@ void main() {
     float kr = 1.0;
     float shining = 20.0;
 
-    float ks = shadowMarch(Ray(i.point, lightDir), 200.0)*.7 + .3;
+    float ks = shadowMarch(Ray(i.point, lightDir), 60.0)*.7 + .3;
 
     float light =
       ks * (
