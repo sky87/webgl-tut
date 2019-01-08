@@ -9,9 +9,9 @@ export function makeDemo({
   draw,
   raf = false
 }: {
-  raf: boolean;
-  setup: (gl: WebGLRenderingContext) => void;
-  draw: (gl: WebGLRenderingContext) => void;
+  raf?: boolean;
+  setup?: (gl: WebGLRenderingContext) => void;
+  draw?: (gl: WebGLRenderingContext) => void;
 }) {
   if (currentDemo != null) {
     currentDemo.stop();
