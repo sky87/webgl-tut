@@ -168,7 +168,7 @@ export function compileShader(
       const line = parseInt(lineStr, 10) - 1;
 
       buf += "\n";
-      buf += sourceLines.slice(Math.max(0, line - 1), Math.min(line + 1, sourceLines.length - 1)).
+      buf += sourceLines.slice(Math.max(0, line - 1), Math.min(line + 2, sourceLines.length)).
           map((sl, index) => String(index + line).padEnd(5) + "|" + sl).
           join("\n");
       buf += `\n\nLine ${lineStr}: ${msg}\n`;

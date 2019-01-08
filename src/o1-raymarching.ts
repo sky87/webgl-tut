@@ -193,16 +193,16 @@ Intersection rayMarch(Ray r) {
   return NO_INTERSECTION;
 }
 
-float shadowMarch(Ray ray, float k) {
+float shadowMarch(Ray ray, float k, float lightDist) {
   float res = 1.0;
-  float t = 0.1;
+  float t = 0.01;
   for(int i = 0; i < MAX_STEPS; i++) {
     float h = sdScene(ray.o + ray.d*t);
-    if (h<0.001)
+    if (h < EPSILON)
       return 0.0;
     res = min(res, k*h/t);
     t += h;
-    if (t > MAX_DISTANCE) break;
+    if (t > lightDist) break;
   }
   return res;
 }
@@ -214,8 +214,11 @@ void main() {
   }
   else {
     vec3 pointLight = vec3(3, 2, -5);
+
+    pointLight = vec3(2.0*cos(time*PI), 2, 2.0*sin(time*PI));
     vec3 sphereColor = vec3(.8, .7, .7);
     vec3 lightDir = normalize(pointLight - i.point);
+    float lightDist = length(pointLight - i.point);
 
     vec3 n = normalize(sdSceneGrad(i.point));
 
@@ -224,7 +227,7 @@ void main() {
     float kr = 1.0;
     float shining = 20.0;
 
-    float ks = shadowMarch(Ray(i.point, lightDir), 60.0)*.7 + .3;
+    float ks = shadowMarch(Ray(i.point, lightDir), 60.0, lightDist)*.7 + .3;
 
     float light =
       ks * (
