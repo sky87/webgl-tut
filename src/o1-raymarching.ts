@@ -1,3 +1,15 @@
+/**
+ * This is an example of the flexibility afforded by shaders.
+ * Here the GPU is rendering two triangles froming a rectangle that fills the entire page.
+ * Inside this rectangle the fragment shader is raytracing a scene using a technique
+ * called ray marching.
+ * 
+ * If you are interested I suggest the following page for a general introduction:
+ *   http://jamie-wong.com/2016/07/15/ray-marching-signed-distance-functions/
+ * and Inigo Quilez website for more articles on this topic and others on procedural graphics
+ *   https://iquilezles.org/www/index.htm
+ */
+
 import {
   makeDemo,
   randomOpaqueColor,
