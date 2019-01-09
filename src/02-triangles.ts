@@ -62,11 +62,11 @@ setupDemo({
 
     // Bind the buffer to the position attribute in the vertex shader
     gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBuffer);
+    gl.enableVertexAttribArray(shaderProgram.attribute("position"));
     gl.vertexAttribPointer(
       shaderProgram.attribute("position"),
       2, gl.FLOAT, false, 0, 0
     );
-    gl.enableVertexAttribArray(shaderProgram.attribute("position"));
 
     // Tell opengl to draw triangles
     gl.drawArrays(gl.TRIANGLES, 0, 6);

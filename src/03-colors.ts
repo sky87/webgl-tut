@@ -83,30 +83,27 @@ setupDemo({
   draw(gl: WebGLRenderingContext) {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-    // Clear the screen
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // Tell opengl to use the program we compiled previously
     gl.useProgram(shaderProgram.id);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.enableVertexAttribArray(shaderProgram.attribute("position"));
     gl.vertexAttribPointer(
       shaderProgram.attribute("position"),
       2, gl.FLOAT, false, 0, 0
     );
-    gl.enableVertexAttribArray(shaderProgram.attribute("position"));
 
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.enableVertexAttribArray(shaderProgram.attribute("color"));
     gl.vertexAttribPointer(
       shaderProgram.attribute("color"),
       3, gl.FLOAT, false, 0, 0
     );
-    gl.enableVertexAttribArray(shaderProgram.attribute("color"));
 
     gl.uniform1f(shaderProgram.uniform("time"), performance.now()/1000);
 
-    // Tell opengl to draw triangles
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   },
 });
