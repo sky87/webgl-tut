@@ -5,8 +5,6 @@ export interface Demo {
   raf: boolean
 }
 
-export let demo: Demo = null;
-
 export function setupDemo({
   setup,
   draw,
@@ -16,18 +14,19 @@ export function setupDemo({
   setup?: (gl: WebGLRenderingContext) => void;
   draw?: (gl: WebGLRenderingContext) => void;
 }) {
+  console.log("Setting up demo");
+  const global = window as any;
+  let demo = global.demo;
   if (demo == null) {
     console.log("Initializing canvas");
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement("canvas") as HTMLCanvasElement;
     canvas.id = "demo-canvas";
-    Object.assign(document.body.style, {
-      margin: 0,
-      height: "100%",
-      overflow: "hidden"
-    });
     canvas.width = document.body.offsetWidth;
     canvas.height = document.body.offsetHeight;
     document.body.appendChild(canvas);
+    const errorLog = document.createElement("div");
+    errorLog.id = "error-log";
+    document.body.append(errorLog);
     
     const fitCanvas = () => {
       canvas.width = document.body.offsetWidth;
@@ -36,7 +35,7 @@ export function setupDemo({
     }
     window.addEventListener("resize", fitCanvas);
     
-    demo = {
+    demo = global.demo = {
       canvas,
       gl: null,
       draw: null,

@@ -46,10 +46,12 @@ const float PI = 3.141592653589793;
 vec3 debugOut = vec3(-123456, 0, 0);
 
 // Camera definition
-vec3 lookFrom = vec3(5, 2, -4);
+vec3 lookFrom = vec3(8, 2, -6);
 vec3 lookAt = vec3(0, 0, 0);
 vec3 cameraUp = vec3(0, 1, 0);
 float fovDeg = 40.0;
+
+vec3 rotationAxis;
 
 struct Ray {
   vec3 o;
@@ -63,6 +65,10 @@ struct Intersection {
 };
 
 const Intersection NO_INTERSECTION = Intersection(Ray(vec3(0), vec3(0)), -1.0, vec3(0));
+
+float randf(float t){
+  return fract(sin(t*12.9898) * 43758.5453);
+}
 
 mat3 rot3(vec3 axis, float angle) {
   axis = normalize(axis);
@@ -112,7 +118,7 @@ float sdScene(vec3 p) {
   float d;
 
   {
-    p = rot3(vec3(1, 1, 0), -t*2.0*PI) * p;
+    p = rot3(rotationAxis, -t*2.0*PI) * p;
 
     d = sdSphere(p, vec3(0), 1.0);
     
@@ -145,7 +151,7 @@ float sdScene(vec3 p) {
   d = sdUnion(d, sdPlane(p, vec3(0, -1.8, 0), vec3(0, 1, 0)));
   d = sdUnion(d, sdPlane(p, vec3(-8, 0, 0), vec3(1, 0, 0)));
   d = sdUnion(d, sdPlane(p, vec3(0, 0, 8), vec3(0, 0, -1)));
-  
+
   return d;
 }
 
@@ -207,15 +213,38 @@ float shadowMarch(Ray ray, float k, float lightDist) {
   return res;
 }
 
+// Cubic interpolation (0 -> v1, 1 -> v2)
+vec3 cmix(
+  vec3 v0, vec3 v1,
+  vec3 v2, vec3 v3,
+  float t
+) {
+  vec3 a0 = v3 - v2 - v0 + v1;
+  vec3 a1 = v0 - v1 - a0;
+  vec3 a2 = v2 - v0;
+  vec3 a3 = v1;
+
+  return a0*t*t*t + a1*t*t + a2*t + a3;
+}
+
+vec3 randn3(float t) {
+  return normalize(vec3(randf(t), randf(t + .1), randf(t + .2)));
+}
+
 void main() {
+  float nextAxisPeriod = 1.0;
+  float pc = float(int(time/nextAxisPeriod));
+  rotationAxis = cmix(
+    randn3(pc), randn3(pc + 1.0), randn3(pc + 2.0), randn3(pc + 3.0),
+    fract(time/nextAxisPeriod)
+  );
+
   Intersection i = rayMarch(cameraRay(vScreenUV));
   if (i.distance < 0.0) {
     gl_FragColor = vec4(0, 0, 0, 1);
   }
   else {
-    vec3 pointLight = vec3(3, 2, -5);
-
-    pointLight = vec3(2.0*cos(time*PI), 2, 2.0*sin(time*PI));
+    vec3 pointLight = vec3(3, 1, -5);
     vec3 sphereColor = vec3(.8, .7, .7);
     vec3 lightDir = normalize(pointLight - i.point);
     float lightDist = length(pointLight - i.point);
